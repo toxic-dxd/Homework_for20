@@ -1,43 +1,36 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.1.0' // Плагин Spring Boot
-	id 'io.spring.dependency-management' version '1.1.0' // Плагин для управления зависимостями Spring
+	id 'org.springframework.boot' version '3.1.0'
+	id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = "org.example"
 version = "1.0-SNAPSHOT"
 
-// Указываем версию Java
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
-	mavenCentral() // Используем Maven Central для загрузки зависимостей
+	mavenCentral()
 }
 
 dependencies {
-	// Spring Boot Starter Web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
-	// Lombok (опционально, для сокращения boilerplate кода)
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
-	// Spring Boot Starter Test (для тестов)
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-	// JUnit 5 (уже включен в spring-boot-starter-test, но можно указать явно)
 	testImplementation platform('org.junit:junit-bom:5.10.0')
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 tasks.test {
-	useJUnitPlatform() // Используем JUnit Platform для тестов
+	useJUnitPlatform()
 }
 
-// Конфигурация задачи bootJar
 tasks.bootJar {
-	archiveFileName = 'currency-tracker.jar' // Имя выходного JAR-файла
+	archiveFileName = 'currency-tracker.jar'
 }
