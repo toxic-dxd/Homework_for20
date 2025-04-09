@@ -2,11 +2,11 @@ package com.example.controller;
 
 import com.example.model.Currency;
 import com.example.model.CurrencyRequest;
+import com.example.repository.CurrencyRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,51 +14,53 @@ import java.util.UUID;
 @RequestMapping("/api/currencies")
 public class CurrencyController {
 
-    private final List<Currency> currencies = new ArrayList<>();
+    private final CurrencyRepository currencyRepository;
+
+    public CurrencyController(CurrencyRepository currencyRepository) {
+        this.currencyRepository = currencyRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<Currency>> getCurrencies() {
-        return ResponseEntity.ok(currencies);
+        return ResponseEntity.ok(currencyRepository.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<Void> addCurrency(@RequestBody CurrencyRequest request) {
+    public ResponseEntity<Currency> addCurrency(@RequestBody CurrencyRequest request) {
         Currency currency = new Currency();
-        currency.setId(UUID.randomUUID().toString());
         currency.setName(request.getName());
         currency.setBaseCurrency(request.getBaseCurrency());
         currency.setPriceChangeRange(request.getPriceChangeRange());
         currency.setDescription(request.getDescription());
-        currencies.add(currency);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+        Currency savedCurrency = currencyRepository.save(currency);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCurrency);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Currency> getCurrency(@PathVariable String id) {
-        return currencies.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
+    public ResponseEntity<Currency> getCurrency(@PathVariable UUID id) {
+        return currencyRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCurrency(@PathVariable String id, @RequestBody CurrencyRequest request) {
-        for (Currency currency : currencies) {
-            if (currency.getId().equals(id)) {
-                currency.setName(request.getName());
-                currency.setBaseCurrency(request.getBaseCurrency());
-                currency.setPriceChangeRange(request.getPriceChangeRange());
-                currency.setDescription(request.getDescription());
-                return ResponseEntity.ok().build();
-            }
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Currency> updateCurrency(@PathVariable UUID id, @RequestBody CurrencyRequest request) {
+        return currencyRepository.findById(id)
+                .map(currency -> {
+                    currency.setName(request.getName());
+                    currency.setBaseCurrency(request.getBaseCurrency());
+                    currency.setPriceChangeRange(request.getPriceChangeRange());
+                    currency.setDescription(request.getDescription());
+                    return ResponseEntity.ok(currencyRepository.save(currency));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCurrency(@PathVariable String id) {
-        if (currencies.removeIf(c -> c.getId().equals(id))) {
+    public ResponseEntity<Void> deleteCurrency(@PathVariable UUID id) {
+        if (currencyRepository.existsById(id)) {
+            currencyRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
