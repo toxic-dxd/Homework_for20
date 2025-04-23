@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.model.Currency;
 import com.example.model.CurrencyRequest;
 import com.example.repository.CurrencyRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/currencies")
+@RequiredArgsConstructor
 public class CurrencyController {
 
     private final CurrencyRepository currencyRepository;
